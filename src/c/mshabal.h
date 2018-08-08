@@ -226,16 +226,14 @@ void simd512_mshabal_init(mshabal512_context *sc, unsigned out_size);
  * corresponding instance is deactivated (the final value obtained from
  * that instance is undefined).
  */
-void simd128_mshabal(mshabal_context *sc, const void *data0, const void *data1,
-                     const void *data2, const void *data3, size_t len);
-void simd256_mshabal(mshabal256_context *sc, void *data0, void *data1,
-                     void *data2, void *data3, void *data4, void *data5,
-                     void *data6, void *data7, size_t len);
-void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1,
-                     void *data2, void *data3, void *data4, void *data5,
-                     void *data6, void *data7, void *data8, void *data9,
-                     void *data10, void *data11, void *data12, void *data13,
-                     void *data14, void *data15, size_t len);
+void simd128_mshabal(mshabal_context *sc, const void *data0, const void *data1, const void *data2,
+                     const void *data3, size_t len);
+void simd256_mshabal(mshabal256_context *sc, void *data0, void *data1, void *data2, void *data3,
+                     void *data4, void *data5, void *data6, void *data7, size_t len);
+void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1, void *data2, void *data3,
+                     void *data4, void *data5, void *data6, void *data7, void *data8, void *data9,
+                     void *data10, void *data11, void *data12, void *data13, void *data14,
+                     void *data15, size_t len);
 /*
  * Terminate the Shabal computation incarnated by the provided context
  * structure. "n" shall be a value between 0 and 7 (inclusive): this is
@@ -258,42 +256,34 @@ void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1,
  * release it, or reinitialize it with mshabal_init(). The mshabal_close()
  * function does NOT imply a hidden call to mshabal_init().
  */
-void simd128_mshabal_close(mshabal_context *sc, unsigned ub0, unsigned ub1,
-                           unsigned ub2, unsigned ub3, unsigned n, void *dst0,
-                           void *dst1, void *dst2, void *dst3);
-void simd256_mshabal_close(mshabal256_context *sc, unsigned ub0, unsigned ub1,
-                           unsigned ub2, unsigned ub3, unsigned ub4,
-                           unsigned ub5, unsigned ub6, unsigned ub7, unsigned n,
-                           void *dst0, void *dst1, void *dst2, void *dst3,
-                           void *dst4, void *dst5, void *dst6, void *dst7);
-void simd512_mshabal_close(mshabal512_context *sc, unsigned ub0, unsigned ub1,
-                           unsigned ub2, unsigned ub3, unsigned ub4,
-                           unsigned ub5, unsigned ub6, unsigned ub7,
-                           unsigned ub8, unsigned ub9, unsigned ub10,
-                           unsigned ub11, unsigned ub12, unsigned ub13,
-                           unsigned ub14, unsigned ub15, unsigned n, void *dst0,
-                           void *dst1, void *dst2, void *dst3, void *dst4,
-                           void *dst5, void *dst6, void *dst7, void *dst8,
-                           void *dst9, void *dst10, void *dst11, void *dst12,
-                           void *dst13, void *dst14, void *dst15);
+void simd128_mshabal_close(mshabal_context *sc, unsigned ub0, unsigned ub1, unsigned ub2,
+                           unsigned ub3, unsigned n, void *dst0, void *dst1, void *dst2,
+                           void *dst3);
+void simd256_mshabal_close(mshabal256_context *sc, unsigned ub0, unsigned ub1, unsigned ub2,
+                           unsigned ub3, unsigned ub4, unsigned ub5, unsigned ub6, unsigned ub7,
+                           unsigned n, void *dst0, void *dst1, void *dst2, void *dst3, void *dst4,
+                           void *dst5, void *dst6, void *dst7);
+void simd512_mshabal_close(mshabal512_context *sc, unsigned ub0, unsigned ub1, unsigned ub2,
+                           unsigned ub3, unsigned ub4, unsigned ub5, unsigned ub6, unsigned ub7,
+                           unsigned ub8, unsigned ub9, unsigned ub10, unsigned ub11, unsigned ub12,
+                           unsigned ub13, unsigned ub14, unsigned ub15, unsigned n, void *dst0,
+                           void *dst1, void *dst2, void *dst3, void *dst4, void *dst5, void *dst6,
+                           void *dst7, void *dst8, void *dst9, void *dst10, void *dst11,
+                           void *dst12, void *dst13, void *dst14, void *dst15);
 /*
  * Combined open and close routines
  */
 
-void simd128_mshabal_openclose_fast(mshabal_context_fast *sc, void *u1,
-                                    void *u2, void *dst0, void *dst1,
-                                    void *dst2, void *dst3);
-void simd256_mshabal_openclose_fast(mshabal256_context_fast *sc, void *u1,
-                                    void *u2, void *dst0, void *dst1,
-                                    void *dst2, void *dst3, void *dst4,
-                                    void *dst5, void *dst6, void *dst7);
-void simd512_mshabal_openclose_fast(mshabal512_context_fast *sc, void *u1,
-                                    void *u2, void *dst0, void *dst1,
-                                    void *dst2, void *dst3, void *dst4,
-                                    void *dst5, void *dst6, void *dst7,
-                                    void *dst8, void *dst9, void *dst10,
-                                    void *dst11, void *dst12, void *dst13,
-                                    void *dst14, void *dst15);
+void simd128_mshabal_openclose_fast(mshabal_context_fast *sc, void *u1, void *u2, void *dst0,
+                                    void *dst1, void *dst2, void *dst3);
+void simd256_mshabal_openclose_fast(mshabal256_context_fast *sc, void *u1, void *u2, void *dst0,
+                                    void *dst1, void *dst2, void *dst3, void *dst4, void *dst5,
+                                    void *dst6, void *dst7);
+void simd512_mshabal_openclose_fast(mshabal512_context_fast *sc, void *u1, void *u2, void *dst0,
+                                    void *dst1, void *dst2, void *dst3, void *dst4, void *dst5,
+                                    void *dst6, void *dst7, void *dst8, void *dst9, void *dst10,
+                                    void *dst11, void *dst12, void *dst13, void *dst14,
+                                    void *dst15);
 
 #ifdef __cplusplus
 }

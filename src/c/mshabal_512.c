@@ -39,16 +39,15 @@ typedef mshabal_u32 u32;
 #define T32(x) ((x)&C32(0xFFFFFFFF))
 #define ROTL32(x, n) T32(((x) << (n)) | ((x) >> (32 - (n))))
 
-static void simd512_mshabal_compress(
-    mshabal512_context *sc, const unsigned char *buf0,
-    const unsigned char *buf1, const unsigned char *buf2,
-    const unsigned char *buf3, const unsigned char *buf4,
-    const unsigned char *buf5, const unsigned char *buf6,
-    const unsigned char *buf7, const unsigned char *buf8,
-    const unsigned char *buf9, const unsigned char *buf10,
-    const unsigned char *buf11, const unsigned char *buf12,
-    const unsigned char *buf13, const unsigned char *buf14,
-    const unsigned char *buf15, size_t num) {
+static void simd512_mshabal_compress(mshabal512_context *sc, const unsigned char *buf0,
+                                     const unsigned char *buf1, const unsigned char *buf2,
+                                     const unsigned char *buf3, const unsigned char *buf4,
+                                     const unsigned char *buf5, const unsigned char *buf6,
+                                     const unsigned char *buf7, const unsigned char *buf8,
+                                     const unsigned char *buf9, const unsigned char *buf10,
+                                     const unsigned char *buf11, const unsigned char *buf12,
+                                     const unsigned char *buf13, const unsigned char *buf14,
+                                     const unsigned char *buf15, size_t num) {
     union {
         u32 words[64 * MSHABAL512_FACTOR];
         __m512i data[16];
@@ -57,8 +56,7 @@ static void simd512_mshabal_compress(
     __m512i A[12], B[16], C[16];
     __m512i one;
 
-    for (j = 0; j < 12; j++)
-        A[j] = _mm512_loadu_si512((__m512i *)sc->state + j);
+    for (j = 0; j < 12; j++) A[j] = _mm512_loadu_si512((__m512i *)sc->state + j);
     for (j = 0; j < 16; j++) {
         B[j] = _mm512_loadu_si512((__m512i *)sc->state + j + 12);
         C[j] = _mm512_loadu_si512((__m512i *)sc->state + j + 28);
@@ -94,25 +92,21 @@ static void simd512_mshabal_compress(
         A[1] = _mm512_xor_si512(A[1], _mm512_set1_epi32(sc->Whigh));
 
         for (j = 0; j < 16; j++)
-            B[j] = _mm512_or_si512(_mm512_slli_epi32(B[j], 17),
-                                   _mm512_srli_epi32(B[j], 15));
+            B[j] = _mm512_or_si512(_mm512_slli_epi32(B[j], 17), _mm512_srli_epi32(B[j], 15));
 
-#define PP512(xa0, xa1, xb0, xb1, xb2, xb3, xc, xm)               \
-    do {                                                          \
-        __m512i tt;                                               \
-        tt = _mm512_or_si512(_mm512_slli_epi32(xa1, 15),          \
-                             _mm512_srli_epi32(xa1, 17));         \
-        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 2), tt);      \
-        tt = _mm512_xor_si512(_mm512_xor_si512(xa0, tt), xc);     \
-        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 1), tt);      \
-        tt = _mm512_xor_si512(                                    \
-            _mm512_xor_si512(tt, xb1),                            \
-            _mm512_xor_si512(_mm512_andnot_si512(xb3, xb2), xm)); \
-        xa0 = tt;                                                 \
-        tt = xb0;                                                 \
-        tt = _mm512_or_si512(_mm512_slli_epi32(tt, 1),            \
-                             _mm512_srli_epi32(tt, 31));          \
-        xb0 = _mm512_xor_si512(tt, _mm512_xor_si512(xa0, one));   \
+#define PP512(xa0, xa1, xb0, xb1, xb2, xb3, xc, xm)                                   \
+    do {                                                                              \
+        __m512i tt;                                                                   \
+        tt = _mm512_or_si512(_mm512_slli_epi32(xa1, 15), _mm512_srli_epi32(xa1, 17)); \
+        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 2), tt);                          \
+        tt = _mm512_xor_si512(_mm512_xor_si512(xa0, tt), xc);                         \
+        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 1), tt);                          \
+        tt = _mm512_xor_si512(_mm512_xor_si512(tt, xb1),                              \
+                              _mm512_xor_si512(_mm512_andnot_si512(xb3, xb2), xm));   \
+        xa0 = tt;                                                                     \
+        tt = xb0;                                                                     \
+        tt = _mm512_or_si512(_mm512_slli_epi32(tt, 1), _mm512_srli_epi32(tt, 31));    \
+        xb0 = _mm512_xor_si512(tt, _mm512_xor_si512(xa0, one));                       \
     } while (0)
 
         PP512(A[0x0], A[0xB], B[0x0], B[0xD], B[0x9], B[0x6], C[0x8], M(0x0));
@@ -247,8 +241,7 @@ static void simd512_mshabal_compress(
         if (++sc->Wlow == 0) sc->Whigh++;
     }
 
-    for (j = 0; j < 12; j++)
-        _mm512_storeu_si512((__m512i *)sc->state + j, A[j]);
+    for (j = 0; j < 12; j++) _mm512_storeu_si512((__m512i *)sc->state + j, A[j]);
     for (j = 0; j < 16; j++) {
         _mm512_storeu_si512((__m512i *)sc->state + j + 12, B[j]);
         _mm512_storeu_si512((__m512i *)sc->state + j + 28, C[j]);
@@ -261,8 +254,7 @@ static void simd512_mshabal_compress(
 void simd512_mshabal_init(mshabal512_context *sc, unsigned out_size) {
     unsigned u;
 
-    for (u = 0; u < (12 + 16 + 16) * 4 * MSHABAL512_FACTOR; u++)
-        sc->state[u] = 0;
+    for (u = 0; u < (12 + 16 + 16) * 4 * MSHABAL512_FACTOR; u++) sc->state[u] = 0;
     memset(sc->buf0, 0, sizeof sc->buf0);
     memset(sc->buf1, 0, sizeof sc->buf1);
     memset(sc->buf2, 0, sizeof sc->buf2);
@@ -314,10 +306,9 @@ void simd512_mshabal_init(mshabal512_context *sc, unsigned out_size) {
         sc->buf15[4 * u + 1] = (out_size + u) >> 8;
     }
     sc->Whigh = sc->Wlow = C32(0xFFFFFFFF);
-    simd512_mshabal_compress(sc, sc->buf0, sc->buf1, sc->buf2, sc->buf3,
-                             sc->buf4, sc->buf5, sc->buf6, sc->buf7, sc->buf8,
-                             sc->buf9, sc->buf10, sc->buf11, sc->buf12,
-                             sc->buf13, sc->buf14, sc->buf15, 1);
+    simd512_mshabal_compress(sc, sc->buf0, sc->buf1, sc->buf2, sc->buf3, sc->buf4, sc->buf5,
+                             sc->buf6, sc->buf7, sc->buf8, sc->buf9, sc->buf10, sc->buf11,
+                             sc->buf12, sc->buf13, sc->buf14, sc->buf15, 1);
     for (u = 0; u < 16; u++) {
         sc->buf0[4 * u + 0] = (out_size + u + 16);
         sc->buf0[4 * u + 1] = (out_size + u + 16) >> 8;
@@ -352,20 +343,18 @@ void simd512_mshabal_init(mshabal512_context *sc, unsigned out_size) {
         sc->buf15[4 * u + 0] = (out_size + u + 16);
         sc->buf15[4 * u + 1] = (out_size + u + 16) >> 8;
     }
-    simd512_mshabal_compress(sc, sc->buf0, sc->buf1, sc->buf2, sc->buf3,
-                             sc->buf4, sc->buf5, sc->buf6, sc->buf7, sc->buf8,
-                             sc->buf9, sc->buf10, sc->buf11, sc->buf12,
-                             sc->buf13, sc->buf14, sc->buf15, 1);
+    simd512_mshabal_compress(sc, sc->buf0, sc->buf1, sc->buf2, sc->buf3, sc->buf4, sc->buf5,
+                             sc->buf6, sc->buf7, sc->buf8, sc->buf9, sc->buf10, sc->buf11,
+                             sc->buf12, sc->buf13, sc->buf14, sc->buf15, 1);
     sc->ptr = 0;
     sc->out_size = out_size;
 }
 
 /* see shabal_small.h */
-void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1,
-                     void *data2, void *data3, void *data4, void *data5,
-                     void *data6, void *data7, void *data8, void *data9,
-                     void *data10, void *data11, void *data12, void *data13,
-                     void *data14, void *data15, size_t len) {
+void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1, void *data2, void *data3,
+                     void *data4, void *data5, void *data6, void *data7, void *data8, void *data9,
+                     void *data10, void *data11, void *data12, void *data13, void *data14,
+                     void *data15, size_t len) {
     size_t ptr, num;
     ptr = sc->ptr;
     if (ptr != 0) {
@@ -408,10 +397,9 @@ void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1,
             memcpy(sc->buf13 + ptr, data13, clen);
             memcpy(sc->buf14 + ptr, data14, clen);
             memcpy(sc->buf15 + ptr, data15, clen);
-            simd512_mshabal_compress(
-                sc, sc->buf0, sc->buf1, sc->buf2, sc->buf3, sc->buf4, sc->buf5,
-                sc->buf6, sc->buf7, sc->buf8, sc->buf9, sc->buf10, sc->buf11,
-                sc->buf12, sc->buf13, sc->buf14, sc->buf15, 1);
+            simd512_mshabal_compress(sc, sc->buf0, sc->buf1, sc->buf2, sc->buf3, sc->buf4, sc->buf5,
+                                     sc->buf6, sc->buf7, sc->buf8, sc->buf9, sc->buf10, sc->buf11,
+                                     sc->buf12, sc->buf13, sc->buf14, sc->buf15, 1);
             data0 = (unsigned char *)data0 + clen;
             data1 = (unsigned char *)data1 + clen;
             data2 = (unsigned char *)data2 + clen;
@@ -434,15 +422,14 @@ void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1,
 
     num = 1;
     if (num != 0) {
-        simd512_mshabal_compress(
-            sc, (const unsigned char *)data0, (const unsigned char *)data1,
-            (const unsigned char *)data2, (const unsigned char *)data3,
-            (const unsigned char *)data4, (const unsigned char *)data5,
-            (const unsigned char *)data6, (const unsigned char *)data7,
-            (const unsigned char *)data8, (const unsigned char *)data9,
-            (const unsigned char *)data10, (const unsigned char *)data11,
-            (const unsigned char *)data12, (const unsigned char *)data13,
-            (const unsigned char *)data14, (const unsigned char *)data15, num);
+        simd512_mshabal_compress(sc, (const unsigned char *)data0, (const unsigned char *)data1,
+                                 (const unsigned char *)data2, (const unsigned char *)data3,
+                                 (const unsigned char *)data4, (const unsigned char *)data5,
+                                 (const unsigned char *)data6, (const unsigned char *)data7,
+                                 (const unsigned char *)data8, (const unsigned char *)data9,
+                                 (const unsigned char *)data10, (const unsigned char *)data11,
+                                 (const unsigned char *)data12, (const unsigned char *)data13,
+                                 (const unsigned char *)data14, (const unsigned char *)data15, num);
         sc->xbuf0 = (unsigned char *)data0 + (num << 6);
         sc->xbuf1 = (unsigned char *)data1 + (num << 6);
         sc->xbuf2 = (unsigned char *)data2 + (num << 6);
@@ -467,8 +454,8 @@ void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1,
 // Johnnys double pointer no memmove no register buffering burst mining only
 // optimisation functions (tm) :-p
 
-static void simd512_mshabal_compress_fast(mshabal512_context_fast *sc, void *u1,
-                                          void *u2, size_t num) {
+static void simd512_mshabal_compress_fast(mshabal512_context_fast *sc, void *u1, void *u2,
+                                          size_t num) {
     union input {
         u32 words[64 * MSHABAL512_FACTOR];
         __m512i data[16];
@@ -478,8 +465,7 @@ static void simd512_mshabal_compress_fast(mshabal512_context_fast *sc, void *u1,
     __m512i A[12], B[16], C[16];
     __m512i one;
 
-    for (j = 0; j < 12; j++)
-        A[j] = _mm512_loadu_si512((__m512i *)sc->state + j);
+    for (j = 0; j < 12; j++) A[j] = _mm512_loadu_si512((__m512i *)sc->state + j);
     for (j = 0; j < 16; j++) {
         B[j] = _mm512_loadu_si512((__m512i *)sc->state + j + 12);
         C[j] = _mm512_loadu_si512((__m512i *)sc->state + j + 28);
@@ -496,25 +482,21 @@ static void simd512_mshabal_compress_fast(mshabal512_context_fast *sc, void *u1,
         A[1] = _mm512_xor_si512(A[1], _mm512_set1_epi32(sc->Whigh));
 
         for (j = 0; j < 16; j++)
-            B[j] = _mm512_or_si512(_mm512_slli_epi32(B[j], 17),
-                                   _mm512_srli_epi32(B[j], 15));
+            B[j] = _mm512_or_si512(_mm512_slli_epi32(B[j], 17), _mm512_srli_epi32(B[j], 15));
 
-#define PP512(xa0, xa1, xb0, xb1, xb2, xb3, xc, xm)               \
-    do {                                                          \
-        __m512i tt;                                               \
-        tt = _mm512_or_si512(_mm512_slli_epi32(xa1, 15),          \
-                             _mm512_srli_epi32(xa1, 17));         \
-        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 2), tt);      \
-        tt = _mm512_xor_si512(_mm512_xor_si512(xa0, tt), xc);     \
-        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 1), tt);      \
-        tt = _mm512_xor_si512(                                    \
-            _mm512_xor_si512(tt, xb1),                            \
-            _mm512_xor_si512(_mm512_andnot_si512(xb3, xb2), xm)); \
-        xa0 = tt;                                                 \
-        tt = xb0;                                                 \
-        tt = _mm512_or_si512(_mm512_slli_epi32(tt, 1),            \
-                             _mm512_srli_epi32(tt, 31));          \
-        xb0 = _mm512_xor_si512(tt, _mm512_xor_si512(xa0, one));   \
+#define PP512(xa0, xa1, xb0, xb1, xb2, xb3, xc, xm)                                   \
+    do {                                                                              \
+        __m512i tt;                                                                   \
+        tt = _mm512_or_si512(_mm512_slli_epi32(xa1, 15), _mm512_srli_epi32(xa1, 17)); \
+        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 2), tt);                          \
+        tt = _mm512_xor_si512(_mm512_xor_si512(xa0, tt), xc);                         \
+        tt = _mm512_add_epi32(_mm512_slli_epi32(tt, 1), tt);                          \
+        tt = _mm512_xor_si512(_mm512_xor_si512(tt, xb1),                              \
+                              _mm512_xor_si512(_mm512_andnot_si512(xb3, xb2), xm));   \
+        xa0 = tt;                                                                     \
+        tt = xb0;                                                                     \
+        tt = _mm512_or_si512(_mm512_slli_epi32(tt, 1), _mm512_srli_epi32(tt, 31));    \
+        xb0 = _mm512_xor_si512(tt, _mm512_xor_si512(xa0, one));                       \
     } while (0)
 
         PP512(A[0x0], A[0xB], B[0x0], B[0xD], B[0x9], B[0x6], C[0x8], M(0x0));
@@ -642,8 +624,7 @@ static void simd512_mshabal_compress_fast(mshabal512_context_fast *sc, void *u1,
         A[1] = _mm512_xor_si512(A[1], _mm512_set1_epi32(sc->Whigh));
 
         for (j = 0; j < 16; j++)
-            B[j] = _mm512_or_si512(_mm512_slli_epi32(B[j], 17),
-                                   _mm512_srli_epi32(B[j], 15));
+            B[j] = _mm512_or_si512(_mm512_slli_epi32(B[j], 17), _mm512_srli_epi32(B[j], 15));
 
         PP512(A[0x0], A[0xB], B[0x0], B[0xD], B[0x9], B[0x6], C[0x8], M2(0x0));
         PP512(A[0x1], A[0x0], B[0x1], B[0xE], B[0xA], B[0x7], C[0x7], M2(0x1));
@@ -756,8 +737,7 @@ static void simd512_mshabal_compress_fast(mshabal512_context_fast *sc, void *u1,
     }
 
     // transfer results to ram
-    for (j = 0; j < 12; j++)
-        _mm512_storeu_si512((__m512i *)sc->state + j, A[j]);
+    for (j = 0; j < 12; j++) _mm512_storeu_si512((__m512i *)sc->state + j, A[j]);
     for (j = 0; j < 16; j++) {
         _mm512_storeu_si512((__m512i *)sc->state + j + 12, B[j]);
         _mm512_storeu_si512((__m512i *)sc->state + j + 28, C[j]);
@@ -769,13 +749,11 @@ union input {
     __m512i data[16];
 };
 
-void simd512_mshabal_openclose_fast(mshabal512_context_fast *sc, void *u1,
-                                    void *u2, void *dst0, void *dst1,
-                                    void *dst2, void *dst3, void *dst4,
-                                    void *dst5, void *dst6, void *dst7,
-                                    void *dst8, void *dst9, void *dst10,
-                                    void *dst11, void *dst12, void *dst13,
-                                    void *dst14, void *dst15) {
+void simd512_mshabal_openclose_fast(mshabal512_context_fast *sc, void *u1, void *u2, void *dst0,
+                                    void *dst1, void *dst2, void *dst3, void *dst4, void *dst5,
+                                    void *dst6, void *dst7, void *dst8, void *dst9, void *dst10,
+                                    void *dst11, void *dst12, void *dst13, void *dst14,
+                                    void *dst15) {
     unsigned z, off, out_size_w32;
     // run shabal
     simd512_mshabal_compress_fast(sc, u1, u2, 1);

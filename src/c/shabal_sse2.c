@@ -19,8 +19,7 @@ mshabal256_context_fast global_256_fast;
 void init_shabal_sse2() {
     simd128_mshabal_init(&global_128, 256);
     global_128_fast.out_size = global_128.out_size;
-    for (int i = 0; i < 176; i++)
-        global_128_fast.state[i] = global_128.state[i];
+    for (int i = 0; i < 176; i++) global_128_fast.state[i] = global_128.state[i];
     global_128_fast.Whigh = global_128.Whigh;
     global_128_fast.Wlow = global_128.Wlow;
 }
