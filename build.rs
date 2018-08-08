@@ -6,7 +6,7 @@ fn main() {
     #[cfg(target_env = "msvc")]
     config.flag("/arch:AVX2");
     #[cfg(not(target_env = "msvc"))]
-    config.flag("-std=c99").flag("-march=native");
+    config.flag("-std=c99").flag("-march=native").flag("-mavx512f");
 
     config
         .file("src/c/sph_shabal.c")
