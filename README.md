@@ -69,11 +69,11 @@ plot_dirs:
 # url for getting mining info + submitting nonces
 url: 'http://pool.dev.burst-test.net:8124'
 
-# threads to use for calculating deadlines | defaults to num cores + 1
-worker_thread_count: 2
+# threads to use for calculating deadlines | defaults to number of disks plotfiles are spread over
+worker_thread_count: 30
 
 # threads to use for reading from disks | defaults to number of disks plotfiles are spread over
-reader_thread_count: 3
+reader_thread_count: 30
 
 # nonces to read in at once
 # there will be worker_thread_count * 2 buffers in total
