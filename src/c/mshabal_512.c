@@ -464,49 +464,6 @@ void simd512_mshabal(mshabal512_context *sc, void *data0, void *data1,
     sc->ptr = len;
 }
 
-/* see shabal_small.h */
-void simd512_mshabal_close(mshabal512_context *sc, unsigned ub0, unsigned ub1,
-                           unsigned ub2, unsigned ub3, unsigned ub4,
-                           unsigned ub5, unsigned ub6, unsigned ub7,
-                           unsigned ub8, unsigned ub9, unsigned ub10,
-                           unsigned ub11, unsigned ub12, unsigned ub13,
-                           unsigned ub14, unsigned ub15, unsigned n, void *dst0,
-                           void *dst1, void *dst2, void *dst3, void *dst4,
-                           void *dst5, void *dst6, void *dst7, void *dst8,
-                           void *dst9, void *dst10, void *dst11, void *dst12,
-                           void *dst13, void *dst14, void *dst15) {
-    unsigned z, off, out_size_w32;
-
-    for (z = 0; z < 4; z++) {
-        simd512_mshabal_compress(
-            sc, sc->xbuf0, sc->xbuf1, sc->xbuf2, sc->xbuf3, sc->xbuf4,
-            sc->xbuf5, sc->xbuf6, sc->xbuf7, sc->xbuf8, sc->xbuf9, sc->xbuf10,
-            sc->xbuf11, sc->xbuf12, sc->xbuf13, sc->xbuf14, sc->xbuf15, 1);
-        if (sc->Wlow-- == 0) sc->Whigh--;
-    }
-    out_size_w32 = sc->out_size >> 5;
-    off = MSHABAL512_FACTOR * 4 * (28 + (16 - out_size_w32));
-    for (z = 0; z < out_size_w32; z++) {
-        unsigned y = off + MSHABAL512_FACTOR * (z << 2);
-        ((u32 *)dst0)[z] = sc->state[y + 0];
-        ((u32 *)dst1)[z] = sc->state[y + 1];
-        ((u32 *)dst2)[z] = sc->state[y + 2];
-        ((u32 *)dst3)[z] = sc->state[y + 3];
-        ((u32 *)dst4)[z] = sc->state[y + 4];
-        ((u32 *)dst5)[z] = sc->state[y + 5];
-        ((u32 *)dst6)[z] = sc->state[y + 6];
-        ((u32 *)dst7)[z] = sc->state[y + 7];
-        ((u32 *)dst8)[z] = sc->state[y + 8];
-        ((u32 *)dst9)[z] = sc->state[y + 9];
-        ((u32 *)dst10)[z] = sc->state[y + 10];
-        ((u32 *)dst11)[z] = sc->state[y + 11];
-        ((u32 *)dst12)[z] = sc->state[y + 12];
-        ((u32 *)dst13)[z] = sc->state[y + 13];
-        ((u32 *)dst14)[z] = sc->state[y + 14];
-        ((u32 *)dst15)[z] = sc->state[y + 15];
-    }
-}
-
 // Johnnys double pointer no memmove no register buffering burst mining only
 // optimisation functions (tm) :-p
 
