@@ -95,6 +95,18 @@ timeout: 5000  # default 5000ms
 
 # delay after disks will be woken up (if 0 no wakeup) [s]
 wakeup_after: 240  # default 240s
+
+# console logging level (options: Off, Error, Warn Info)
+console_log_level: 'Info' # default Info
+
+# logfile logging level (options: Off, Error, Warn Info)
+logfile_log_level: 'Warn' # default Warn
+
+# maximum number of log files to keep
+logfile_max_count: 10
+
+# maximum size per logfile in MiB
+logfile_max_size : 20 
 ```
 
 ### Donate 
