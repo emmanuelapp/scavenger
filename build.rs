@@ -13,7 +13,10 @@ fn main() {
         .file("src/c/mshabal_128.c");
 
     if is_x86_feature_detected!("avx") {
-        config.file("src/c/mshabal_256.c").file("src/c/shabal.c");
+        config
+            .file("src/c/mshabal_256.c")
+            .file("src/c/mshabal_512.c")
+            .file("src/c/shabal.c");
     } else {
         config.file("src/c/shabal_sse2.c");
     }
