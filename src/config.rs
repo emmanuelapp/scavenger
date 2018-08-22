@@ -43,9 +43,6 @@ pub struct Cfg {
     #[serde(default = "default_gpu_nonces_per_cache")]
     pub gpu_nonces_per_cache: usize,
 
-    #[serde(default = "default_gpu_mem_mapping")]
-    pub gpu_mem_mapping: bool,
-
     #[serde(default = "default_target_deadline")]
     pub target_deadline: u64,
 
@@ -116,10 +113,6 @@ fn default_gpu_worker_thread_count() -> usize {
 
 fn default_gpu_nonces_per_cache() -> usize {
     1048576
-}
-
-fn default_gpu_mem_mapping() -> bool {
-    false
 }
 
 fn default_target_deadline() -> u64 {

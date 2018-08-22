@@ -128,30 +128,26 @@ impl Reader {
                     };
 
                     let finished = i_p == (plot_count - 1) && next_plot;
-                    //fork
-                    let gpu_context = buffer.get_gpu_context();
 
-                    match &gpu_context {
-                        None => {
-                            tx_read_replies_cpu.send(ReadReply {
-                                buffer: buffer,
-                                len: bytes_read,
-                                height,
-                                gensig: gensig.clone(),
-                                start_nonce,
-                                finished,
-                            });
-                        }
-                        Some(_context) => {
-                            tx_read_replies_gpu.send(ReadReply {
-                                buffer: buffer,
-                                len: bytes_read,
-                                height,
-                                gensig: gensig.clone(),
-                                start_nonce,
-                                finished,
-                            });
-                        }
+                    //fork cpu / gpu
+                    if buffer.is_gpu() {
+                        tx_read_replies_gpu.send(ReadReply {
+                            buffer: buffer,
+                            len: bytes_read,
+                            height,
+                            gensig: gensig.clone(),
+                            start_nonce,
+                            finished,
+                        });
+                    } else {
+                        tx_read_replies_cpu.send(ReadReply {
+                            buffer: buffer,
+                            len: bytes_read,
+                            height,
+                            gensig: gensig.clone(),
+                            start_nonce,
+                            finished,
+                        });
                     }
 
                     if next_plot {

@@ -55,14 +55,14 @@ pub struct State {
 
 pub trait Buffer {
     // Static method signature; `Self` refers to the implementor type.
-    fn new(buffer_size: usize, context: Option<Arc<GpuContext>>) -> Self
+    fn new(buffer_size: usize) -> Self
     where
         Self: Sized;
     // Instance method signatures; these will return a string.
-    fn get_buffer(&mut self) -> Arc<Mutex<Vec<u8>>>;
+    fn get_buffer_for_reading(&mut self) -> Arc<Mutex<Vec<u8>>>;
     fn get_buffer_for_writing(&mut self) -> Arc<Mutex<Vec<u8>>>;
-    fn get_gpu_context(&self) -> Option<Arc<GpuContext>>;
     fn get_gpu_buffers(&self) -> Option<&GpuBuffer>;
+    fn is_gpu(&self) -> bool;
 }
 
 pub struct CpuBuffer {
@@ -70,7 +70,7 @@ pub struct CpuBuffer {
 }
 
 impl Buffer for CpuBuffer {
-    fn new(buffer_size: usize, _context: Option<Arc<GpuContext>>) -> Self
+    fn new(buffer_size: usize) -> Self
     where
         Self: Sized,
     {
@@ -83,18 +83,17 @@ impl Buffer for CpuBuffer {
             data: Arc::new(Mutex::new(data)),
         }
     }
-    fn get_buffer(&mut self) -> Arc<Mutex<Vec<u8>>> {
+    fn get_buffer_for_reading(&mut self) -> Arc<Mutex<Vec<u8>>> {
         self.data.clone()
     }
     fn get_buffer_for_writing(&mut self) -> Arc<Mutex<Vec<u8>>> {
         self.data.clone()
     }
-    fn get_gpu_context(&self) -> Option<Arc<GpuContext>> {
-        None
-    }
-
     fn get_gpu_buffers(&self) -> Option<&GpuBuffer> {
         None
+    }
+    fn is_gpu(&self) -> bool {
+        false
     }
 }
 
@@ -170,25 +169,23 @@ impl Miner {
 
         let buffer_count = cpu_worker_thread_count * 2 + gpu_worker_thread_count * 2;
         let buffer_size_cpu = cfg.cpu_nonces_per_cache * SCOOP_SIZE as usize;
-        let buffer_size_gpu = cfg.gpu_nonces_per_cache * SCOOP_SIZE as usize;
+
+        let dummycontext =
+            GpuContext::new(cfg.gpu_platform, cfg.gpu_device, cfg.gpu_nonces_per_cache);
+
+        let buffer_size_gpu = dummycontext.gdim1[0] * SCOOP_SIZE as usize;
 
         let (tx_empty_buffers, rx_empty_buffers) = chan::bounded(buffer_count as usize);
         let (tx_read_replies_cpu, rx_read_replies_cpu) = chan::bounded(cpu_worker_thread_count * 2);
         let (tx_read_replies_gpu, rx_read_replies_gpu) = chan::bounded(gpu_worker_thread_count * 2);
 
         for _ in 0..gpu_worker_thread_count * 2 {
-            let context = Arc::new(GpuContext::new(
-                cfg.gpu_platform,
-                cfg.gpu_device,
-                cfg.gpu_nonces_per_cache,
-                cfg.gpu_mem_mapping,
-            ));
-            let gpu_buffer = GpuBuffer::new(buffer_size_gpu, Some(context));
+            let gpu_buffer = GpuBuffer::new(buffer_size_gpu);
             tx_empty_buffers.send(Box::new(gpu_buffer) as Box<Buffer + Send>);
         }
 
         for _ in 0..cpu_worker_thread_count * 2 {
-            let cpu_buffer = CpuBuffer::new(buffer_size_cpu, None);
+            let cpu_buffer = CpuBuffer::new(buffer_size_cpu);
             tx_empty_buffers.send(Box::new(cpu_buffer) as Box<Buffer + Send>);
         }
 
@@ -206,16 +203,20 @@ impl Miner {
                     rx_read_replies_cpu.clone(),
                     tx_empty_buffers.clone(),
                     tx_nonce_data.clone(),
+                    None,
                 )
             });
         }
 
         for _ in 0..gpu_worker_thread_count {
             thread::spawn({
+                let context =
+                    GpuContext::new(cfg.gpu_platform, cfg.gpu_device, cfg.gpu_nonces_per_cache);
                 create_worker_task(
                     rx_read_replies_gpu.clone(),
                     tx_empty_buffers.clone(),
                     tx_nonce_data.clone(),
+                    Some(context),
                 )
             });
         }
