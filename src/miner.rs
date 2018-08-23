@@ -170,10 +170,13 @@ impl Miner {
         let buffer_count = cpu_worker_thread_count * 2 + gpu_worker_thread_count * 2;
         let buffer_size_cpu = cfg.cpu_nonces_per_cache * SCOOP_SIZE as usize;
 
-        let dummycontext =
-            GpuContext::new(cfg.gpu_platform, cfg.gpu_device, cfg.gpu_nonces_per_cache);
-
-        let buffer_size_gpu = dummycontext.gdim1[0] * SCOOP_SIZE as usize;
+        let dummycontext;
+        let mut buffer_size_gpu = 0;
+        if gpu_worker_thread_count > 0 {
+            dummycontext =
+                GpuContext::new(cfg.gpu_platform, cfg.gpu_device, cfg.gpu_nonces_per_cache);
+                buffer_size_gpu = dummycontext.gdim1[0] * SCOOP_SIZE as usize;
+        }
 
         let (tx_empty_buffers, rx_empty_buffers) = chan::bounded(buffer_count as usize);
         let (tx_read_replies_cpu, rx_read_replies_cpu) = chan::bounded(cpu_worker_thread_count * 2);
