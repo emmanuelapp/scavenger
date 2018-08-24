@@ -383,8 +383,11 @@ pub fn find_best_deadline_gpu(
 }
 
 fn get_kernel_work_group_size(x: &core::Kernel, y: &core::DeviceId) -> usize {
-    match core::get_kernel_work_group_info(x, y, KernelWorkGroupInfo::WorkGroupSize).unwrap() {
-        core::KernelWorkGroupInfoResult::WorkGroupSize(kws) => kws,
-        _ => panic!("Unexpected error"),
+    match core::get_kernel_work_group_info(x, y, KernelWorkGroupInfo::WorkGroupSize) {
+        Ok(res) => match res {
+            core::KernelWorkGroupInfoResult::WorkGroupSize(kws) => kws,
+            _ => panic!("Unexpected error"),
+        },
+        Err(_e) => 16,
     }
 }
